@@ -32,8 +32,8 @@ This repo is the **platform**: the Supabase backend (database, auth, security, t
 
 ```mermaid
 flowchart TD
-    W["🌐 Booking Website<br/><sub>Next.js · Vercel</sub>"]
-    D["🎛️ Backoffice<br/><sub>Next.js · Vercel</sub>"]
+    W["🌐 Booking Website<br/><sub>Next.js · Cloudflare</sub>"]
+    D["🎛️ Backoffice<br/><sub>Next.js · Cloudflare</sub>"]
     P["🧾 POS<br/><sub>Flutter · Windows + Android</sub>"]
     S["☁️ Supabase<br/><sub>Postgres · Auth · RLS · Realtime · Edge Functions</sub>"]
     W -->|book| S

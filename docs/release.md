@@ -10,7 +10,7 @@ Releases happen **only from reviewed, merged changes** (Golden Rule #1). Never p
 > Migrations are **forward-only** and must apply cleanly on a fresh DB in CI before merge.
 
 ## Web (Stage 3)
-Deployed to Vercel from `main` (preview deploys per PR). Env/secrets in Vercel project settings.
+Deployed to **Cloudflare Pages** from `main` (a preview URL per branch, so `develop` is the staging link). Build/env in the Cloudflare Pages project. Next.js runs via the OpenNext adapter (static placeholder for now).
 
 ## POS
 The Flutter POS releases from its own repo — **[`rosea-pos`](https://github.com/GaryCharbel/rosea-pos)** — where CI builds a Windows zip + an Android APK and uploads both to the MEGA folder. See that repo's `CLAUDE.md`.
