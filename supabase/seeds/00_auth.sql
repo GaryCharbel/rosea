@@ -1,0 +1,3 @@
+-- Seed: auth users for local dev (owner + staff + a client).
+-- Filled in Phase 5 (seed task). Keep ordered before 10_demo.sql.
+-- NOTE: local/demo credentials only — never real secrets.

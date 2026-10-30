@@ -1,0 +1,24 @@
+# Node / tooling
+node_modules/
+*.log
+.DS_Store
+
+# Secrets — never commit (Golden Rule #10)
+.env
+.env.*
+!.env.example
+supabase/.env
+supabase/functions/.env
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# Web (Next.js — Stage 3)
+web/.next/
+web/node_modules/
+web/out/
+.vercel/
+
+# Misc
+*.local

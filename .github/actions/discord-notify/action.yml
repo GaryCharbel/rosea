@@ -1,0 +1,79 @@
+name: discord-notify
+description: Post a large, branded Discord embed (animated pass/fail GIF + banner) after a job.
+inputs:
+  webhook:
+    description: Discord webhook URL (from the DISCORD_WEBHOOK secret). Skips if empty.
+    required: true
+  job:
+    description: Human name of the action/job being reported.
+    required: true
+  status:
+    description: Job status — success / failure / cancelled.
+    required: true
+  details:
+    description: Optional extra description line.
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Post to Discord
+      shell: bash
+      env:
+        WEBHOOK: ${{ inputs.webhook }}
+        JOB: ${{ inputs.job }}
+        STATUS: ${{ inputs.status }}
+        DETAILS: ${{ inputs.details }}
+      run: |
+        set +e  # a notification must never fail the job
+        if [ -z "$WEBHOOK" ]; then echo "DISCORD_WEBHOOK not set — skipping Discord post."; exit 0; fi
+        case "$STATUS" in
+          success)   COLOR=3066993;  ICON="✅"; WORD="passed";    GIFS=(success-green.gif success-ship.gif);;
+          failure)   COLOR=15158332; ICON="❌"; WORD="failed";    GIFS=(fail-red.gif fail-logs.gif);;
+          cancelled) COLOR=9807270;  ICON="⚪"; WORD="cancelled"; GIFS=(fail-logs.gif fail-red.gif);;
+          *)         COLOR=15844367; ICON="🔔"; WORD="$STATUS";   GIFS=(success-green.gif);;
+        esac
+        IDX=$(( GITHUB_RUN_ID % ${#GIFS[@]} ))
+        GIF="$GITHUB_WORKSPACE/.github/${GIFS[$IDX]}"
+        BANNER="$GITHUB_WORKSPACE/.github/banner.png"
+        RUN="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+        TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        SHORT="${GITHUB_SHA:0:7}"
+        jq -n \
+          --arg icon "$ICON" --arg job "$JOB" --arg word "$WORD" \
+          --arg url "$RUN" --argjson color "$COLOR" \
+          --arg repo "$GITHUB_REPOSITORY" --arg ref "$GITHUB_REF_NAME" \
+          --arg event "$GITHUB_EVENT_NAME" --arg actor "$GITHUB_ACTOR" \
+          --arg sha "$SHORT" --arg details "$DETAILS" --arg ts "$TS" \
+          '{username:"Rosea CI",
+            embeds:[{
+              author:{name:$repo, url:$url},
+              title:($icon+"  "+$ref+"  —  "+$job+"  "+($word|ascii_upcase)),
+              url:$url, color:$color,
+              description:(if $details=="" then ("Branch **"+$ref+"** · triggered by `"+$event+"`") else $details end),
+              fields:[
+                {name:"Branch",value:("`"+$ref+"`"),inline:true},
+                {name:"By",value:$actor,inline:true},
+                {name:"Commit",value:("`"+$sha+"`"),inline:true}
+              ],
+              image:{url:"attachment://status.gif"},
+              thumbnail:{url:"attachment://banner.png"},
+              footer:{text:"Rosea CI · GaryCharbel"},
+              timestamp:$ts
+            }],
+            attachments:[
+              {id:0,filename:"status.gif"},
+              {id:1,filename:"banner.png"}
+            ]}' > discord-payload.json
+        code=$(curl -sS -o /tmp/discord-resp.txt -w '%{http_code}' \
+          -F "payload_json=<discord-payload.json" \
+          -F "files[0]=@$GIF;type=image/gif;filename=status.gif" \
+          -F "files[1]=@$BANNER;type=image/png;filename=banner.png" \
+          "$WEBHOOK")
+        echo "Discord HTTP $code"
+        if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+          echo "::warning::Discord post failed (HTTP $code): $(cat /tmp/discord-resp.txt)"
+        else
+          echo "Discord post OK."
+        fi
+        exit 0
