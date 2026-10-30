@@ -20,8 +20,20 @@ jobs:
         with:
           node-version: "20"
       - run: npm install
-      - name: Start local Supabase
-        run: npx supabase start
+      - name: Start local Supabase (DB only — avoids pulling the full stack)
+        # Only Postgres is needed for migrations + pgTAP. Excluding the rest cuts
+        # ~10 image pulls (public ECR anonymous pulls get rate-limited on shared
+        # runner IPs). Retry a couple of times in case a pull still rate-limits.
+        run: |
+          for i in 1 2 3; do
+            npx supabase start \
+              -x studio,realtime,storage-api,imgproxy,edge-runtime,logflare,vector,mailpit,gotrue \
+              && break
+            echo "::warning::supabase start attempt $i failed (likely registry rate limit) — retrying in 25s"
+            npx supabase stop --no-backup >/dev/null 2>&1 || true
+            sleep 25
+          done
+          npx supabase status
       - name: Lint schema
         run: npx supabase db lint --level error
       - name: Apply migrations from scratch + seed

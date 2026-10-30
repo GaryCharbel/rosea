@@ -25,6 +25,7 @@ runs:
         STATUS: ${{ inputs.status }}
         DETAILS: ${{ inputs.details }}
       run: |
+        set +e  # a notification must never fail the job
         if [ -z "$WEBHOOK" ]; then echo "DISCORD_WEBHOOK not set — skipping Discord post."; exit 0; fi
         case "$STATUS" in
           success)   COLOR=3066993;  ICON="✅"; WORD="passed";    GIFS=(success-green.gif success-ship.gif);;
@@ -59,9 +60,20 @@ runs:
               thumbnail:{url:"attachment://banner.png"},
               footer:{text:"Rosea CI · GaryCharbel"},
               timestamp:$ts
-            }]}' > "discord-payload.json"
-        curl -sf -H "Expect:" \
-          -F "payload_json=@$RUNNER_TEMP/discord.json;type=application/json" \
+            }],
+            attachments:[
+              {id:0,filename:"status.gif"},
+              {id:1,filename:"banner.png"}
+            ]}' > discord-payload.json
+        code=$(curl -sS -o /tmp/discord-resp.txt -w '%{http_code}' \
+          -F "payload_json=@discord-payload.json;type=application/json" \
           -F "files[0]=@$GIF;type=image/gif;filename=status.gif" \
           -F "files[1]=@$BANNER;type=image/png;filename=banner.png" \
-          "$WEBHOOK" || echo "::warning::Discord post failed (non-fatal)."
+          "$WEBHOOK")
+        echo "Discord HTTP $code"
+        if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+          echo "::warning::Discord post failed (HTTP $code): $(cat /tmp/discord-resp.txt)"
+        else
+          echo "Discord post OK."
+        fi
+        exit 0
