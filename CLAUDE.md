@@ -24,7 +24,7 @@ Rosea is a beauty-salon platform (online booking website + desktop POS + backoff
 
 Rosea is split into **two git repos**, grouped by toolchain + release cadence:
 
-1. **`rosea` (THIS repo) — the platform.** Supabase backend/infra + the web apps (one TS ecosystem; deploys to Supabase + Vercel):
+1. **`rosea` (THIS repo) — the platform.** Supabase backend/infra + the web apps (one TS ecosystem; deploys to Supabase + Cloudflare Pages):
    ```
    rosea/
      CLAUDE.md  docs/

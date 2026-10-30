@@ -4,7 +4,7 @@
 
 **Rosea** is a beauty-salon platform built free for the owners (friends); they pay only running costs (Supabase Pro ~$25/mo + domain ~$15/yr). Three products eventually sit on **one Supabase backend**:
 
-1. Public booking website (Next.js/Vercel) — **deferred**
+1. Public booking website (Next.js on Cloudflare Pages) — **deferred**
 2. POS (Flutter — **Windows desktop + Android APK** from one codebase) — **built in this slice**
 3. Backoffice dashboard (Next.js) — **deferred**
 
