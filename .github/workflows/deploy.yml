@@ -2,9 +2,10 @@ name: deploy
 
 # develop → staging, main → production.
 # Backend = push Supabase migrations to the cloud project for that environment.
-# Frontend = Vercel's native Git integration (connect the repo once, production
-#   branch = main) auto-deploys preview (develop/PRs) + production (main) URLs —
-#   no job needed here. This workflow handles the backend + posts a deploy embed.
+# Frontend = Cloudflare Pages' Git integration (connect the repo once, production
+#   branch = main, root dir = web) auto-deploys preview (develop/PRs) + production
+#   (main) URLs — no job needed here. This workflow handles the backend + posts a
+#   deploy embed. (Next.js on Pages later via the OpenNext adapter; static for now.)
 on:
   push:
     branches: [develop, main]
