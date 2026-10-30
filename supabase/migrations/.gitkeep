@@ -1,0 +1,2 @@
+# Migrations are added here via `npx supabase migration new <name>` (Phase 1).
+# Migration #1 creates the `private` schema + SECURITY DEFINER role helpers + enums.

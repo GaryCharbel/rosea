@@ -1,0 +1,3 @@
+-- Seed: demo salon so the POS is testable immediately (Phase 5).
+-- salon_settings, categories, ~8 services, ~5 products (some commission-eligible),
+-- ~3 staff with different commission rates, a sample client.

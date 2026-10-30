@@ -1,0 +1,32 @@
+name: supabase
+
+on:
+  push:
+  pull_request:
+    paths:
+      - "supabase/**"
+      - "package.json"
+      - ".github/workflows/supabase.yml"
+
+# CI never touches the cloud project — it spins up a throwaway local stack.
+jobs:
+  db:
+    name: migrations · lint · pgTAP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install
+      - name: Start local Supabase
+        run: npx supabase start
+      - name: Lint schema
+        run: npx supabase db lint --level error
+      - name: Apply migrations from scratch + seed
+        run: npx supabase db reset
+      - name: pgTAP tests
+        run: npx supabase test db
+      - name: Stop
+        if: always()
+        run: npx supabase stop

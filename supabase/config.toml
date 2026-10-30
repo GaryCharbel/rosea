@@ -1,0 +1,36 @@
+# Supabase local config for Rosea. See https://supabase.com/docs/guides/cli/config
+project_id = "rosea"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 17
+
+[db.seed]
+enabled = true
+sql_paths = ["./seeds/00_auth.sql", "./seeds/10_demo.sql"]
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false   # local only — never in production
+
+# Edge Function seam for notifications (Stage 2). JWT off locally for easy testing.
+[functions.send-email]
+verify_jwt = false
