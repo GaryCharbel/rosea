@@ -48,7 +48,7 @@ runs:
           '{username:"Rosea CI",
             embeds:[{
               author:{name:$repo, url:$url},
-              title:($icon+"  "+$job+" "+$word),
+              title:($icon+"  "+$ref+"  —  "+$job+"  "+($word|ascii_upcase)),
               url:$url, color:$color,
               description:(if $details=="" then ("Branch **"+$ref+"** · triggered by `"+$event+"`") else $details end),
               fields:[
