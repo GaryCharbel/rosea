@@ -9,6 +9,7 @@ on:
       - ".github/workflows/supabase.yml"
 
 # CI never touches the cloud project — it spins up a throwaway local stack.
+# Posts a large Discord embed (pass/fail GIF) when the DB job finishes.
 jobs:
   db:
     name: migrations · lint · pgTAP
@@ -30,3 +31,10 @@ jobs:
       - name: Stop
         if: always()
         run: npx supabase stop
+      - name: Notify Discord
+        if: always()
+        uses: ./.github/actions/discord-notify
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          job: "DB — migrations · lint · pgTAP"
+          status: ${{ job.status }}

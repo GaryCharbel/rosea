@@ -14,3 +14,9 @@ Deployed to Vercel from `main` (preview deploys per PR). Env/secrets in Vercel p
 
 ## POS
 The Flutter POS releases from its own repo — **[`rosea-pos`](https://github.com/GaryCharbel/rosea-pos)** — where CI builds a Windows zip + an Android APK and uploads both to the MEGA folder. See that repo's `CLAUDE.md`.
+
+## CI / repo secrets (names only — set in GitHub → Settings → Secrets → Actions)
+This repo (`rosea`):
+- `DISCORD_WEBHOOK` — Discord webhook for CI result notifications.
+
+Never commit secret values; CI reads them from the encrypted store. (`rosea-pos` has its own `DISCORD_WEBHOOK` + `MEGA_USER` / `MEGA_PASS` / `MEGA_FOLDER`.)
