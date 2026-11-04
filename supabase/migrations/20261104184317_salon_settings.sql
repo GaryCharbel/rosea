@@ -1,7 +1,9 @@
 -- M02 — salon_settings (singleton).
 -- One row of salon-wide config (id is identity + CHECK (id = 1), so a second
 -- row can never be inserted). tax_rate and loyalty_enabled are forward hooks for
--- later stages (fixed/false in Stage 1). RLS is enabled in Phase 2 (M-rls).
+-- later stages (fixed/false in Stage 1).
+
+-- ── table ─────────────────────────────────────────────────────────────────────
 create table public.salon_settings (
   id              integer primary key generated always as identity check (id = 1),
   name            text not null default 'Rosea',
@@ -16,7 +18,12 @@ create table public.salon_settings (
   updated_at      timestamptz not null default now()
 );
 
+-- ── RLS: enabled from day one (default-deny); access policies land in Phase 2 / M-rls ──
+alter table public.salon_settings enable row level security;
+
+-- ── updated_at trigger ─────────────────────────────────────────────────────────
 create trigger trg_salon_settings_updated before update on public.salon_settings
   for each row execute function public.set_updated_at();
 
+-- ── seed the singleton row ─────────────────────────────────────────────────────
 insert into public.salon_settings (name) values ('Rosea'); -- id = 1

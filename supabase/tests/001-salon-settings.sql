@@ -1,6 +1,6 @@
 -- pgTAP — M02 salon_settings singleton. Run with: npx supabase test db
 begin;
-select plan(7);
+select plan(8);
 
 select has_table('public', 'salon_settings', 'salon_settings table exists');
 select has_trigger('public', 'salon_settings', 'trg_salon_settings_updated', 'updated_at trigger present');
@@ -22,6 +22,14 @@ select throws_ok(
   $$ update public.salon_settings set currency = 'usd' where id = 1 $$,
   '23514', null,
   'currency must match ^[A-Z]{3}$'
+);
+
+-- updated_at trigger actually fires on update (BEFORE UPDATE sets it to now())
+update public.salon_settings set name = name where id = 1;
+select is(
+  (select updated_at = transaction_timestamp() from public.salon_settings where id = 1),
+  true,
+  'updated_at trigger sets updated_at to now() on update'
 );
 
 select * from finish();
