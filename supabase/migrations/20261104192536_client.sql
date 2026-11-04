@@ -8,6 +8,7 @@ create table public.client (
   id             uuid primary key default gen_random_uuid(),
   name           text not null check (length(trim(name)) > 0),
   phone          text,
+  phone_norm     text generated always as (nullif(regexp_replace(phone, '[^0-9]', '', 'g'), '')) stored, -- digits-only; the uniqueness key
   email          text check (email is null or email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$'),
   notes          text,
   user_id        uuid unique references auth.users(id) on delete set null, -- Stage 2 hook
@@ -24,8 +25,10 @@ create trigger trg_client_updated before update on public.client
   for each row execute function public.set_updated_at();
 
 -- ── lookup indexes (front desk searches by phone / email) ───────────────────────
--- phone is a unique identifier when provided. The index is UNIQUE but phone stays
--- nullable, so walk-ins without a phone are still allowed (Postgres treats NULLs as
--- distinct → many null-phone clients OK; only duplicate non-null phones are rejected).
-create unique index idx_client_phone on public.client(phone);
+-- phone_norm (digits only) is the unique identifier when provided, so '03-111222',
+-- '03 111 222' and '03111222' all collide. phone stays nullable, so walk-ins without
+-- a phone are still allowed (Postgres treats NULLs as distinct → many null OK; only
+-- duplicate normalized phones are rejected). Note: this normalizes formatting, not
+-- country-code equivalence (e.g. '+9613...' vs local '03...' are not unified).
+create unique index idx_client_phone_norm on public.client(phone_norm);
 create index idx_client_email on public.client(lower(email));
