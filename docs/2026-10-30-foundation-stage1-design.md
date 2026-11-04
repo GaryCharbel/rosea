@@ -166,6 +166,7 @@ create table public.client (
   id             uuid primary key default gen_random_uuid(),
   name           text not null check (length(trim(name)) > 0),
   phone          text,
+  phone_norm     text generated always as (nullif(regexp_replace(phone, '[^0-9]', '', 'g'), '')) stored, -- digits-only uniqueness key
   email          text check (email is null or email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$'),
   notes          text,
   user_id        uuid unique references auth.users(id) on delete set null, -- Stage 2 hook
@@ -175,7 +176,7 @@ create table public.client (
 );
 create trigger trg_client_updated before update on public.client
   for each row execute function public.set_updated_at();
-create index idx_client_phone on public.client(phone);
+create unique index idx_client_phone_norm on public.client(phone_norm); -- digits-only phone is a unique id when present (nullable -> walk-ins OK)
 create index idx_client_email on public.client(lower(email));
 ```
 

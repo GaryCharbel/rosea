@@ -96,7 +96,7 @@
       <div class="brand"><span class="r">✿</span> Rosea <span style="color:var(--mut);font-weight:600;font-size:18px">· Build Checklist</span></div>
       <div class="sub">Foundation → Stage 1 (POS core) → website → dashboard → loyalty. A living A→Z tracker.</div>
     </div>
-    <div class="stamp"><b>Last updated</b><br>2026-11-04 · M02 merged; M03 in PR</div>
+    <div class="stamp"><b>Last updated</b><br>2026-11-04 · M03 merged; M04 in PR</div>
   </header>
 
   <div class="hero">
@@ -136,8 +136,8 @@
     <ul class="tasks">
       <li class="task" data-status="done"><span class="s"></span><div class="tx"><span class="id">1.1</span> <span class="ti">M01 — enums + <code>set_updated_at</code> + <code>private.*</code> helpers</span><span class="no">merged to develop (#3); follow-up migration hardens current_role() against an empty-string JWT claim (caught in local runtime testing)</span></div></li>
       <li class="task" data-status="done"><span class="s"></span><div class="tx"><span class="id">1.2</span> <span class="ti">M02 — <code>salon_settings</code> singleton (id=1)</span><span class="no">merged to develop (#5); RLS enabled at creation + updated_at trigger tested</span></div></li>
-      <li class="task" data-status="wip"><span class="s"></span><div class="tx"><span class="id">1.3</span> <span class="ti">M03 — <code>staff</code> + <code>staff_public</code> view (rates hidden)</span><span class="tag">in PR</span><span class="no">migration + pgTAP written; runtime-verified locally (RLS on, staff_public exposes no rate cols, constraints); in PR on feat/m03-staff</span></div></li>
-      <li class="task" data-status="todo"><span class="s"></span><div class="tx"><span class="id">1.4</span> <span class="ti">M04 — <code>client</code></span></div></li>
+      <li class="task" data-status="done"><span class="s"></span><div class="tx"><span class="id">1.3</span> <span class="ti">M03 — <code>staff</code> + <code>staff_public</code> view (rates hidden)</span><span class="no">merged to develop (#6); RLS at creation + security_invoker view</span></div></li>
+      <li class="task" data-status="wip"><span class="s"></span><div class="tx"><span class="id">1.4</span> <span class="ti">M04 — <code>client</code></span><span class="tag">in PR</span><span class="no">migration + pgTAP written; runtime-verified locally (RLS on, email/name/loyalty CHECKs, phone+email indexes); in PR on feat/m04-client</span></div></li>
       <li class="task" data-status="todo"><span class="s"></span><div class="tx"><span class="id">1.5</span> <span class="ti">M05 — <code>profiles</code> + auth bridge (handle_new_user, role guard, set_user_role, JWT hook)</span></div></li>
       <li class="task" data-status="todo"><span class="s"></span><div class="tx"><span class="id">1.6</span> <span class="ti">M06–M08 — catalog: category, service, product (kind-guards, partial indexes)</span></div></li>
       <li class="task" data-status="todo"><span class="s"></span><div class="tx"><span class="id">1.7</span> <span class="ti">M09–M11 — ticket, ticket_line, immutability guards (generated line_total)</span></div></li>
