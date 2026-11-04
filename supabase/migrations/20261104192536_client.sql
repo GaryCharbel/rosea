@@ -24,5 +24,8 @@ create trigger trg_client_updated before update on public.client
   for each row execute function public.set_updated_at();
 
 -- ── lookup indexes (front desk searches by phone / email) ───────────────────────
-create index idx_client_phone on public.client(phone);
+-- phone is a unique identifier when provided. The index is UNIQUE but phone stays
+-- nullable, so walk-ins without a phone are still allowed (Postgres treats NULLs as
+-- distinct → many null-phone clients OK; only duplicate non-null phones are rejected).
+create unique index idx_client_phone on public.client(phone);
 create index idx_client_email on public.client(lower(email));

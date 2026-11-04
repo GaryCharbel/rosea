@@ -175,7 +175,7 @@ create table public.client (
 );
 create trigger trg_client_updated before update on public.client
   for each row execute function public.set_updated_at();
-create index idx_client_phone on public.client(phone);
+create unique index idx_client_phone on public.client(phone); -- phone is a unique id when present (nullable -> walk-ins OK)
 create index idx_client_email on public.client(lower(email));
 ```
 
