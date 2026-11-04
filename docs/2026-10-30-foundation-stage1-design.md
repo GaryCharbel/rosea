@@ -77,7 +77,7 @@ The backend is the shared contract. Monorepo (`rosea/`) with `supabase/` (source
 
 ## 5. Data model (consolidated DDL)
 
-Conventions: PKs `uuid default gen_random_uuid()` except `profiles.id = auth.users.id` and `salon_settings.id` identity singleton. Money `numeric(12,2)`. Rates `numeric(5,2)` percent, CHECK 0–100. `created_at` everywhere; `updated_at` + shared `set_updated_at()` on mutable catalog/config. Soft-delete (`active`) for catalog/staff; transactional rows immutable once a ticket leaves `open`.
+Conventions: PKs `uuid default gen_random_uuid()` except `profiles.id = auth.users.id` and `salon_settings.id` identity singleton. Money `numeric(12,2)`. Rates `numeric(5,2)` percent, CHECK 0–100. `created_at` everywhere; `updated_at` + shared `set_updated_at()` on mutable catalog/config. Soft-delete (`active`) for catalog/staff; transactional rows immutable once a ticket leaves `open`. **RLS is enabled on every table at creation (default-deny); the access policies, column-level REVOKEs, and view grants are grouped in the Phase 2 RLS migration (M-rls).**
 
 ### 5.1 Migration M01 — enums + helpers (the FIRST migration)
 
