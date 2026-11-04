@@ -27,5 +27,8 @@ create trigger trg_staff_updated before update on public.staff
 create index idx_staff_active on public.staff(active) where active;
 
 -- ── cashier-safe projection (NO rate columns); the POS caches from this, never public.staff ──
-create view public.staff_public as
+-- security_invoker=true so the view runs with the caller's rights and therefore
+-- ENFORCES staff's RLS (a plain owner-rights view would bypass it). Locked-down by
+-- default until Phase 2 adds the staff read policy + staff_public grants.
+create view public.staff_public with (security_invoker = true) as
   select id, name, title, active from public.staff;

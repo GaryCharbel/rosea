@@ -1,6 +1,6 @@
 -- pgTAP — M03 staff + staff_public. Run with: npx supabase test db
 begin;
-select plan(9);
+select plan(10);
 
 select has_table('public', 'staff', 'staff table exists');
 select has_view('public', 'staff_public', 'staff_public view exists');
@@ -26,6 +26,11 @@ select throws_ok(
 select lives_ok(
   $$ insert into public.staff (name) values ('Valid Stylist') $$,
   'valid staff row inserts (null product_commission_rate allowed)');
+
+-- staff_public is security_invoker, so it enforces staff's RLS rather than bypassing it
+select is(
+  (select reloptions @> array['security_invoker=true'] from pg_class where oid = 'public.staff_public'::regclass),
+  true, 'staff_public is defined with security_invoker=true');
 
 select * from finish();
 rollback;
