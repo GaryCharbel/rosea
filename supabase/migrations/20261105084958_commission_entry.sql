@@ -14,7 +14,11 @@ create table public.commission_entry (
   amount         numeric(12,2) not null,                 -- round(base*rate/100,2); negative on reversal
   is_reversal    boolean not null default false,
   earned_at      timestamptz not null default now(),
-  created_at     timestamptz not null default now()
+  created_at     timestamptz not null default now(),
+  -- DB-guarantee the commission math (defense in depth; pay_ticket must match the
+  -- §3 formula). Holds for reversals (base & amount both flip sign; round() is
+  -- half-away-from-zero) and for zero-rate lines (amount 0).
+  constraint commission_amount_chk check (amount = round(base_amount * rate / 100, 2))
 );
 alter table public.commission_entry enable row level security;
 

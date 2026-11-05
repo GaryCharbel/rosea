@@ -427,7 +427,8 @@ create table public.commission_entry (
   amount numeric(12,2) not null,                      -- round(base*rate/100,2); negative on reversal
   is_reversal boolean not null default false,
   earned_at timestamptz not null default now(),
-  created_at timestamptz not null default now());
+  created_at timestamptz not null default now(),
+  constraint commission_amount_chk check (amount = round(base_amount*rate/100,2)));  -- DB-guaranteed commission math (pay_ticket must match §3)
 create unique index uq_commission_line_earning on public.commission_entry(ticket_line_id) where not is_reversal;
 create unique index uq_commission_line_reversal on public.commission_entry(ticket_line_id) where is_reversal;
 create index idx_commission_staff_earned on public.commission_entry(staff_id, earned_at);
