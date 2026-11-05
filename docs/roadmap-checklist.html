@@ -96,7 +96,7 @@
       <div class="brand"><span class="r">✿</span> Rosea <span style="color:var(--mut);font-weight:600;font-size:18px">· Build Checklist</span></div>
       <div class="sub">Foundation → Stage 1 (POS core) → website → dashboard → loyalty. A living A→Z tracker.</div>
     </div>
-    <div class="stamp"><b>Last updated</b><br>2026-11-05 · M01–M11 merged; M12–M15 in PR</div>
+    <div class="stamp"><b>Last updated</b><br>2026-11-05 · Phase 1 schema complete; RLS (2.1) in PR</div>
   </header>
 
   <div class="hero">
@@ -141,7 +141,7 @@
       <li class="task" data-status="done"><span class="s"></span><div class="tx"><span class="id">1.5</span> <span class="ti">M05 — <code>profiles</code> + auth bridge (handle_new_user, role guard, set_user_role, JWT hook)</span><span class="no">merged to develop (#8); owner checks hardened (is distinct from); deployed to staging after clearing quickstart drift</span></div></li>
       <li class="task" data-status="done"><span class="s"></span><div class="tx"><span class="id">1.6</span> <span class="ti">M06–M08 — catalog: category, service, product (kind-guards, partial indexes)</span><span class="no">merged to develop (#9); RLS at creation, immutable category kind, case-insensitive name</span></div></li>
       <li class="task" data-status="done"><span class="s"></span><div class="tx"><span class="id">1.7</span> <span class="ti">M09–M11 — ticket, ticket_line, immutability guards (generated line_total)</span><span class="no">merged to develop (#10); generated line_total, per-line performer, idempotency keys, closed-ticket guard</span></div></li>
-      <li class="task" data-status="wip"><span class="s"></span><div class="tx"><span class="id">1.8</span> <span class="ti">M12–M15 — payment, tip, commission_entry, stock_movement (+ indexes)</span><span class="tag">in PR</span><span class="no">3 migrations + pgTAP being built; money tables RPC-write-only, amount≠0, commission earning/reversal unique per line; payment/tip carry NO open-guard (void posts reversals on a paid ticket); in progress on feat/m12-m15-money</span></div></li>
+      <li class="task" data-status="done"><span class="s"></span><div class="tx"><span class="id">1.8</span> <span class="ti">M12–M15 — payment, tip, commission_entry, stock_movement (+ indexes)</span><span class="no">merged to develop (#11); RPC-write-only money tables, amount≠0, commission earning/reversal unique + amount CHECK. ✦ Phase 1 schema (M01–M15) complete</span></div></li>
     </ul>
   </section>
 
@@ -150,7 +150,7 @@
     <div class="phd"><div class="pt">Phase 2 — Auth + RLS (BE) ⨯ POS login/shell (FE)<small>security boundary, built as a pair</small></div>
       <div class="pbar"><i></i></div><div class="mini">0/0</div><div class="caret">▼</div></div>
     <ul class="tasks">
-      <li class="task" data-status="todo"><span class="s"></span><div class="tx"><span class="id">2.1</span> <span class="ti">RLS on every table + helper-based policies; staff rate columns revoked</span><span class="no">get_advisors(security) must be clean; rate-leak &amp; own-commission pgTAP</span></div></li>
+      <li class="task" data-status="wip"><span class="s"></span><div class="tx"><span class="id">2.1</span> <span class="ti">RLS on every table + helper-based policies; staff rate columns revoked</span><span class="tag">in PR</span><span class="no">policies per §6.2 matrix + my_ticket_ids/my_client_ids + money write-lockdown; fixed a real bug — column REVOKE can't override a table GRANT, so rate/commission hiding now uses revoke-table + grant-columns; verified locally via owner/staff/client/anon role simulation; in PR on feat/m16-rls-policies</span></div></li>
       <li class="task" data-status="todo"><span class="s"></span><div class="tx"><span class="id">2.2</span> <span class="ti">POS: Supabase init + session + login (role from JWT, profiles fallback)</span></div></li>
       <li class="task" data-status="todo"><span class="s"></span><div class="tx"><span class="id">2.3</span> <span class="ti">POS: performer selector from <code>staff_public</code> (no PIN in Stage 1)</span></div></li>
     </ul>

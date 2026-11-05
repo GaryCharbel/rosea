@@ -470,8 +470,11 @@ One `auth.users` ↔ one `profiles` row (auto-created by `handle_new_user`, defa
 Key RLS SQL (all policies `to authenticated`; `(select private.fn())` for initplan caching):
 
 ```sql
--- staff rates invisible to cashiers (column-level), POS reads staff_public
-revoke select (commission_rate, product_commission_rate) on public.staff from authenticated;
+-- staff rates invisible to cashiers. NB: a column-level REVOKE does NOT override a
+-- table-level SELECT grant (Supabase gives authenticated table-level SELECT), so drop
+-- the table grant and re-grant SELECT on the non-rate columns only. POS reads staff_public.
+revoke select on public.staff from authenticated;
+grant select (id, name, title, active, user_id, created_at, updated_at) on public.staff to authenticated;  -- no rate columns
 grant select on public.staff_public to authenticated;
 
 -- staff: read needs the view; owner reads full staff row
