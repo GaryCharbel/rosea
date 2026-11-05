@@ -3,7 +3,7 @@
 -- fabricate in CI, so those are exercised in the sandbox. Here we assert structure
 -- plus the access-token hook's no-profile path (callable without any row).
 begin;
-select plan(11);
+select plan(12);
 
 select has_table('public', 'profiles', 'profiles table exists');
 select ok((select relrowsecurity from pg_class where oid = 'public.profiles'::regclass), 'RLS is enabled on profiles');
@@ -25,6 +25,12 @@ select is(
   public.custom_access_token_hook('{"user_id":"00000000-0000-0000-0000-000000000000","claims":{"sub":"x"}}'::jsonb),
   '{"user_id":"00000000-0000-0000-0000-000000000000","claims":{"sub":"x"}}'::jsonb,
   'access-token hook leaves claims unchanged when the user has no profile');
+
+-- owner gate is NOT null-permissive: a caller whose current_role() is NULL (no claim,
+-- no profile) must be rejected, never bypassed (is-distinct hardening)
+select throws_ok(
+  $$ select public.set_user_role('00000000-0000-0000-0000-000000000000'::uuid, 'client') $$,
+  '42501', null, 'set_user_role rejects a non-owner / NULL-role caller');
 
 select * from finish();
 rollback;

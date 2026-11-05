@@ -20,6 +20,9 @@ create table public.profiles (
      or (role='staff'  and staff_id is not null and client_id is null)
      or (role='client' and staff_id is null))
 );
+-- Note: staff/client use soft-delete (active). Hard-deleting a row linked to a
+-- role='staff' profile would trip role_link_chk via the FK set-null, so demote the
+-- profile first (set_user_role) before any hard delete.
 
 -- ── RLS: enabled at creation (default-deny; NOT forced — definer helpers bypass) ──
 alter table public.profiles enable row level security;
@@ -44,7 +47,7 @@ create or replace function public.guard_profile_role_change() returns trigger
   language plpgsql security definer set search_path = '' as $$
 begin
   if (new.role, new.staff_id, new.client_id) is distinct from (old.role, old.staff_id, old.client_id)
-     and private.current_role() <> 'owner' then
+     and private.current_role() is distinct from 'owner' then  -- is-distinct: a NULL role is treated as not-owner (blocked), never a bypass
     raise exception 'Only an owner can change a user''s role or staff/client link. Ask the owner to update this account.'
       using errcode = 'insufficient_privilege';
   end if;
@@ -58,7 +61,7 @@ create or replace function public.set_user_role(
   p_user_id uuid, p_role public.user_role, p_staff_id uuid default null, p_client_id uuid default null)
   returns void language plpgsql security definer set search_path = '' as $$
 begin
-  if private.current_role() <> 'owner' then
+  if private.current_role() is distinct from 'owner' then  -- is-distinct: NULL role is rejected, never a bypass
     raise exception 'Only an owner can assign roles.' using errcode = 'insufficient_privilege'; end if;
   update public.profiles set role=p_role, staff_id=p_staff_id, client_id=p_client_id where id=p_user_id;
   if not found then
