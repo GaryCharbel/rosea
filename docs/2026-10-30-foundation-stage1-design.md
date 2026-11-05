@@ -267,10 +267,11 @@ create table public.category (
   sort_order integer not null default 0,
   active boolean not null default true,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  unique (kind, name));
+  updated_at timestamptz not null default now());
 create trigger trg_category_updated before update on public.category
   for each row execute function public.set_updated_at();
+-- kind immutable once created (trigger forbid_category_kind_change) so linked service/product aren't orphaned
+create unique index uq_category_kind_name on public.category(kind, lower(name)); -- case-insensitive within kind
 create index idx_category_kind on public.category(kind, sort_order) where active;
 
 -- service (bookable_online + duration_minutes are Stage-2 hooks)
