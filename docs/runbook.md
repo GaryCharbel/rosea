@@ -25,6 +25,9 @@ Migration **#1** creates the `private` schema + the `SECURITY DEFINER` role help
 ## Auth hook (one-time, Dashboard)
 After the `profiles` + `custom_access_token_hook` migration, enable the **Custom Access Token** hook in the Supabase Dashboard (Auth → Hooks) so the `user_role` claim is added to JWTs. Document the chosen project ref here when the cloud project is created.
 
+## Data-integrity notes
+- **Tickets are immutable once they leave `open`.** A paid/void ticket's lines are frozen by the `guard_child_only_when_open` trigger, and because `ticket_line.ticket_id` is `ON DELETE CASCADE`, that guard also makes a paid/void ticket **impossible to hard-delete** (the cascade delete of its lines is rejected). This is intentional — corrections are **void + re-ring**, never edit/delete. Never try to `DELETE` a closed ticket; `void_ticket` posts the reversing rows.
+
 ## Cloud (owners' Supabase Pro project)
 - Link: `npx supabase link --project-ref <ref>`
 - Push migrations: `npx supabase db push` (see [release.md](release.md) — reviewed/merged only)
