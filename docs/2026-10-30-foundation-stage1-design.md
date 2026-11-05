@@ -323,7 +323,7 @@ create table public.ticket (
   ticket_no bigint generated always as identity,    -- human receipt #, may gap
   status public.ticket_status not null default 'open',
   opened_by uuid not null references public.staff(id) on delete restrict,
-  created_by uuid not null default (select auth.uid()) references public.profiles(id), -- for ownership RLS
+  created_by uuid not null default auth.uid() references public.profiles(id), -- for ownership RLS (plain auth.uid(); a subquery is not allowed in a column DEFAULT)
   client_id uuid references public.client(id) on delete set null,
   appointment_id uuid,                              -- HOOK Stage 2, pinned null
   opened_at timestamptz not null default now(),
