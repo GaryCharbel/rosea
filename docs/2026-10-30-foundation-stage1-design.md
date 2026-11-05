@@ -401,8 +401,9 @@ create table public.payment (
   created_at timestamptz not null default now());
 create index idx_payment_ticket on public.payment(ticket_id);
 create index idx_payment_method_date on public.payment(method, created_at); -- cash-up
-create trigger trg_payment_open before insert or update or delete on public.payment
-  for each row execute function public.guard_child_only_when_open();
+-- NO open-guard on payment/tip: void_ticket posts reversal rows on a PAID ticket (§7.2),
+-- which the open-guard would block. Direct edits are already prevented by RPC-write-only
+-- (RLS using(false)+REVOKE), so the guard is both wrong and redundant here.
 
 create table public.tip (
   id uuid primary key default gen_random_uuid(),
@@ -414,8 +415,6 @@ create table public.tip (
   created_at timestamptz not null default now());
 create index idx_tip_ticket on public.tip(ticket_id);
 create index idx_tip_staff_date on public.tip(staff_id, created_at);
-create trigger trg_tip_open before insert or update or delete on public.tip
-  for each row execute function public.guard_child_only_when_open();
 
 create table public.commission_entry (
   id uuid primary key default gen_random_uuid(),
