@@ -96,7 +96,7 @@
       <div class="brand"><span class="r">✿</span> Rosea <span style="color:var(--mut);font-weight:600;font-size:18px">· Build Checklist</span></div>
       <div class="sub">Foundation → Stage 1 (POS core) → website → dashboard → loyalty. A living A→Z tracker.</div>
     </div>
-    <div class="stamp"><b>Last updated</b><br>2026-11-05 · M05 merged; M06–M08 in PR</div>
+    <div class="stamp"><b>Last updated</b><br>2026-11-05 · M06–M08 merged; M09–M11 in PR</div>
   </header>
 
   <div class="hero">
@@ -139,8 +139,8 @@
       <li class="task" data-status="done"><span class="s"></span><div class="tx"><span class="id">1.3</span> <span class="ti">M03 — <code>staff</code> + <code>staff_public</code> view (rates hidden)</span><span class="no">merged to develop (#6); RLS at creation + security_invoker view</span></div></li>
       <li class="task" data-status="done"><span class="s"></span><div class="tx"><span class="id">1.4</span> <span class="ti">M04 — <code>client</code></span><span class="no">merged to develop (#7); RLS at creation + normalized unique phone</span></div></li>
       <li class="task" data-status="done"><span class="s"></span><div class="tx"><span class="id">1.5</span> <span class="ti">M05 — <code>profiles</code> + auth bridge (handle_new_user, role guard, set_user_role, JWT hook)</span><span class="no">merged to develop (#8); owner checks hardened (is distinct from); deployed to staging after clearing quickstart drift</span></div></li>
-      <li class="task" data-status="wip"><span class="s"></span><div class="tx"><span class="id">1.6</span> <span class="ti">M06–M08 — catalog: category, service, product (kind-guards, partial indexes)</span><span class="tag">in PR</span><span class="no">3 migrations + pgTAP written; runtime-verified locally (RLS at creation, kind-guard both ways, oversell, unique sku/(kind,name)); in PR on feat/m06-m08-catalog</span></div></li>
-      <li class="task" data-status="todo"><span class="s"></span><div class="tx"><span class="id">1.7</span> <span class="ti">M09–M11 — ticket, ticket_line, immutability guards (generated line_total)</span></div></li>
+      <li class="task" data-status="done"><span class="s"></span><div class="tx"><span class="id">1.6</span> <span class="ti">M06–M08 — catalog: category, service, product (kind-guards, partial indexes)</span><span class="no">merged to develop (#9); RLS at creation, immutable category kind, case-insensitive name</span></div></li>
+      <li class="task" data-status="wip"><span class="s"></span><div class="tx"><span class="id">1.7</span> <span class="ti">M09–M11 — ticket, ticket_line, immutability guards (generated line_total)</span><span class="tag">in PR</span><span class="no">2 migrations + pgTAP; behavioral verify locally (generated line_total, kind/whole-qty/discount CHECKs, closed_at + appointment pins, paid_tx unique, closed-ticket guard freezes lines); in PR on feat/m09-m11-ticket</span></div></li>
       <li class="task" data-status="todo"><span class="s"></span><div class="tx"><span class="id">1.8</span> <span class="ti">M12–M15 — payment, tip, commission_entry, stock_movement (+ indexes)</span></div></li>
     </ul>
   </section>
