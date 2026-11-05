@@ -28,6 +28,16 @@ After the `profiles` + `custom_access_token_hook` migration, enable the **Custom
 ## Data-integrity notes
 - **Tickets are immutable once they leave `open`.** A paid/void ticket's lines are frozen by the `guard_child_only_when_open` trigger, and because `ticket_line.ticket_id` is `ON DELETE CASCADE`, that guard also makes a paid/void ticket **impossible to hard-delete** (the cascade delete of its lines is rejected). This is intentional — corrections are **void + re-ring**, never edit/delete. Never try to `DELETE` a closed ticket; `void_ticket` posts the reversing rows.
 
+## Security advisors (the §6.4 security pass)
+CI runs `db lint` + pgTAP — and pgTAP `013-rls` asserts RLS **and** a policy on every
+public app table (the RLS-coverage gate). For the rest of the Supabase security advisor
+checks (SECURITY DEFINER views, mutable function `search_path`, exposed auth data, etc.),
+run against the linked project after a push:
+```bash
+npx supabase db advisors --level error   # or Dashboard → Advisors
+```
+Treat security-level advisor errors as merge/deploy blockers (Golden Rule #10).
+
 ## Cloud (owners' Supabase Pro project)
 - Link: `npx supabase link --project-ref <ref>`
 - Push migrations: `npx supabase db push` (see [release.md](release.md) — reviewed/merged only)

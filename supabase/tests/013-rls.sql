@@ -1,7 +1,7 @@
 -- pgTAP — Phase 2.1 RLS (privilege + structure; full role-visibility behaviour is
 -- proven in the local sandbox, which needs the auth.users/profiles chain).
 begin;
-select plan(13);
+select plan(14);
 
 -- RLS enabled on every app table
 select ok((select bool_and(relrowsecurity) from pg_class c join pg_namespace n on n.oid=c.relnamespace
@@ -9,6 +9,18 @@ select ok((select bool_and(relrowsecurity) from pg_class c join pg_namespace n o
                ('salon_settings','staff','client','profiles','category','service','product',
                 'ticket','ticket_line','payment','tip','commission_entry','stock_movement')),
   'RLS enabled on every app table');
+
+-- §6.4 security gate (CI-enforced get_advisors equivalent): EVERY public base table
+-- (excluding extension-owned) must have RLS enabled AND at least one policy. A future
+-- table missing either turns this red.
+select is(
+  (select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace
+     where n.nspname='public' and c.relkind='r'
+       and not exists (select 1 from pg_depend d where d.objid=c.oid and d.deptype='e')
+       and (not c.relrowsecurity
+            or not exists (select 1 from pg_policies p where p.schemaname='public' and p.tablename=c.relname))),
+  0::bigint,
+  'every public app table has RLS + at least one policy');
 
 -- rate / commission columns hidden from the till (the column REVOKE+grant pattern)
 select ok(not has_column_privilege('authenticated','public.staff','commission_rate','SELECT'),

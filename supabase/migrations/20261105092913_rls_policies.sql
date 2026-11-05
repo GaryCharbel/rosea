@@ -78,7 +78,7 @@ create policy ticket_staff_insert on public.ticket for insert to authenticated
   with check ((select private.is_staff_or_owner()) and created_by = (select auth.uid()) and status = 'open');
 create policy ticket_staff_update on public.ticket for update to authenticated
   using  ((select private.is_staff_or_owner()) and status = 'open' and id in (select private.my_ticket_ids()))
-  with check (status = 'open');
+  with check ((select private.is_staff_or_owner()) and status = 'open' and id in (select private.my_ticket_ids()));
 create policy ticket_client_read on public.ticket for select to authenticated
   using (client_id in (select private.my_client_ids()));
 
