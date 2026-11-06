@@ -3,7 +3,7 @@
 -- to zero, stock is restored, and the void is idempotent + owner-only.
 -- Same seeding approach as 014 (triggers off to seed, JWT claim to simulate the role).
 begin;
-select plan(13);
+select plan(14);
 
 set session_replication_role = replica;
 
@@ -39,8 +39,11 @@ set session_replication_role = default;
 -- pay the ticket as staff
 select set_config('request.jwt.claims',
   '{"sub":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","user_role":"staff"}', true);
+-- pays 150 to the ticket plus a 10 inline tip to S1, so the void exercises the
+-- payment AND the tip reversal branches.
 select lives_ok($$ select public.pay_ticket('71c00000-0000-0000-0000-0000000000a0',
-  '[{"method":"cash","amount":150.00}]','[]','d1000000-0000-0000-0000-0000000000a1') $$, 'setup: ticket pays');
+  '[{"method":"cash","amount":150.00,"tip_amount":10.00,"tip_staff_id":"11111111-1111-1111-1111-111111111111"}]',
+  '[]','d1000000-0000-0000-0000-0000000000a1') $$, 'setup: ticket pays with a tip');
 
 -- CASE 14: void as owner
 select set_config('request.jwt.claims',
@@ -59,6 +62,8 @@ select is((select qty_delta from public.stock_movement where ticket_id='71c00000
   1, 'case14: a void_restore movement of +1');
 select is((select coalesce(sum(amount),0) from public.payment where ticket_id='71c00000-0000-0000-0000-0000000000a0'),
   0.00, 'case14: payments net to 0 after reversal');
+select is((select coalesce(sum(amount),0) from public.tip where ticket_id='71c00000-0000-0000-0000-0000000000a0'),
+  0.00, 'case14: tips net to 0 after reversal (tip reversal branch)');
 
 -- CASE 15a: idempotent replay of the void (same client_tx) -> no-op, still 2 reversals
 select lives_ok($$ select public.void_ticket('71c00000-0000-0000-0000-0000000000a0','customer refund',
