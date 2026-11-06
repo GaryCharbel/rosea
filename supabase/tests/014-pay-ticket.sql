@@ -10,7 +10,7 @@
 -- test role, then restores them so the real guards are active during pay_ticket. Role
 -- is simulated via the JWT claim.
 begin;
-select plan(33);
+select plan(34);
 
 set session_replication_role = replica;
 
@@ -136,6 +136,12 @@ select throws_ok($$ select public.pay_ticket('71c00000-0000-0000-0000-0000000000
 select throws_ok($$ select public.pay_ticket('71c00000-0000-0000-0000-000000000008',
   '[{"method":"cash","amount":120.00}]','[]','d1000000-0000-0000-0000-000000000008') $$,
   'P0002', null, 'case8: overpay raises P0002');
+
+-- CASE 18: a negative applied amount is rejected even when the split sums to the total
+-- (reuses T7, still open after case7 rolled back). Guards against bogus negative money rows.
+select throws_ok($$ select public.pay_ticket('71c00000-0000-0000-0000-000000000007',
+  '[{"method":"cash","amount":150.00},{"method":"card","amount":-50.00}]','[]','d1000000-0000-0000-0000-000000000018') $$,
+  'P0002', null, 'case18: negative applied amount rejected despite the split summing to total');
 
 -- CASE 9: performer S2 (rate 0) -> entry amount 0
 select lives_ok($$ select public.pay_ticket('71c00000-0000-0000-0000-000000000009',

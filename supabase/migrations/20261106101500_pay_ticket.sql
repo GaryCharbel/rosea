@@ -166,6 +166,22 @@ begin
       using errcode = 'P0004';
   end if;
 
+  -- 7b. Every applied payment and standalone tip must be a POSITIVE amount. Never trust
+  --     the client: the split-sum check and the table CHECK (amount <> 0, which allows
+  --     negatives for void reversals) would otherwise let a bogus negative/zero money
+  --     row land on a sale (e.g. [{cash,150},{card,-50}] sums to 100). This also turns a
+  --     missing/null amount into actionable copy instead of a raw NOT NULL violation.
+  if exists (select 1 from jsonb_array_elements(p_payments) e
+               where coalesce((e->>'amount')::numeric, 0) <= 0) then
+    raise exception 'Every payment must be a positive amount. Fix the split and retry.'
+      using errcode = 'P0002';
+  end if;
+  if exists (select 1 from jsonb_array_elements(p_tips) e
+               where coalesce((e->>'amount')::numeric, 0) <= 0) then
+    raise exception 'Every tip must be a positive amount.'
+      using errcode = 'P0002';
+  end if;
+
   -- 8. Split-payment validation: applied amounts must sum EXACTLY to the total.
   --    (Cash change / overpay is a client-side display concern, not an applied amount.)
   if v_pay_sum <> v_total then
