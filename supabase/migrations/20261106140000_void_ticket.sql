@@ -57,6 +57,15 @@ begin
       using errcode = 'P0001';
   end if;
 
+  -- 5b. The void id must belong to THIS void. If it already voided a different ticket
+  --     (void_tx is UNIQUE), the client reused it in error — surface an actionable
+  --     message instead of a raw unique-violation at the final write.
+  if exists (select 1 from public.ticket
+               where void_tx = p_client_tx and id <> p_ticket_id) then
+    raise exception 'This void id was already used on another ticket. Retry the void with a fresh transaction.'
+      using errcode = 'P0001';
+  end if;
+
   -- Owner accounts have no staff_id; attribute the reversal rows to whoever opened it.
   v_taken_by := coalesce(private.current_staff_id(), v_ticket.opened_by);
 

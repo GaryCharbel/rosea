@@ -10,7 +10,7 @@
 -- test role, then restores them so the real guards are active during pay_ticket. Role
 -- is simulated via the JWT claim.
 begin;
-select plan(34);
+select plan(35);
 
 set session_replication_role = replica;
 
@@ -177,6 +177,12 @@ select is((select count(*) from public.commission_entry where ticket_id='71c0000
   1::bigint, 'case11: replay did not double the commission entry');
 select is((select count(*) from public.payment where ticket_id='71c00000-0000-0000-0000-000000000001'),
   1::bigint, 'case11: replay did not double the payment');
+
+-- CASE 19: a checkout id already used on another paid ticket is rejected with an
+-- actionable P0001 (not a raw unique-violation). Reuses T7 (open) + T1's client_tx.
+select throws_ok($$ select public.pay_ticket('71c00000-0000-0000-0000-000000000007',
+  '[{"method":"cash","amount":100.00}]','[]','d1000000-0000-0000-0000-000000000001') $$,
+  'P0001', null, 'case19: reusing another ticket''s checkout id raises P0001');
 
 -- CASE 13: a client-role caller is denied
 select set_config('request.jwt.claims',

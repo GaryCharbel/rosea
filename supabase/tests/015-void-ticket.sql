@@ -3,7 +3,7 @@
 -- to zero, stock is restored, and the void is idempotent + owner-only.
 -- Same seeding approach as 014 (triggers off to seed, JWT claim to simulate the role).
 begin;
-select plan(14);
+select plan(18);
 
 set session_replication_role = replica;
 
@@ -24,13 +24,16 @@ insert into public.service (id, name, price, active) values
 insert into public.product (id, name, price, track_stock, stock_quantity, commission_eligible, active) values
   ('9a0d0000-0000-0000-0000-000000000001','P_elig',50.00,true,10,true,true);
 
--- T: service 100 (S1) + P_elig x1 (S1) -> paid, then voided ; T3: an open ticket
+-- T(a0): service + product -> paid, then voided ; T3(a3): an open ticket ;
+-- T4(a4): a second paid ticket for the cross-ticket void-id reuse check
 insert into public.ticket (id, status, opened_by, created_by) values
   ('71c00000-0000-0000-0000-0000000000a0','open','11111111-1111-1111-1111-111111111111','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'),
-  ('71c00000-0000-0000-0000-0000000000a3','open','11111111-1111-1111-1111-111111111111','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+  ('71c00000-0000-0000-0000-0000000000a3','open','11111111-1111-1111-1111-111111111111','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'),
+  ('71c00000-0000-0000-0000-0000000000a4','open','11111111-1111-1111-1111-111111111111','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
 insert into public.ticket_line (ticket_id, line_type, service_id, name_snapshot, unit_price, qty, performer_staff_id) values
   ('71c00000-0000-0000-0000-0000000000a0','service','5e415e41-0000-0000-0000-000000000001','Women''s Cut',100.00,1,'11111111-1111-1111-1111-111111111111'),
-  ('71c00000-0000-0000-0000-0000000000a3','service','5e415e41-0000-0000-0000-000000000001','Women''s Cut',100.00,1,'11111111-1111-1111-1111-111111111111');
+  ('71c00000-0000-0000-0000-0000000000a3','service','5e415e41-0000-0000-0000-000000000001','Women''s Cut',100.00,1,'11111111-1111-1111-1111-111111111111'),
+  ('71c00000-0000-0000-0000-0000000000a4','service','5e415e41-0000-0000-0000-000000000001','Women''s Cut',100.00,1,'11111111-1111-1111-1111-111111111111');
 insert into public.ticket_line (ticket_id, line_type, product_id, name_snapshot, unit_price, qty, performer_staff_id) values
   ('71c00000-0000-0000-0000-0000000000a0','product','9a0d0000-0000-0000-0000-000000000001','P_elig',50.00,1,'11111111-1111-1111-1111-111111111111');
 
@@ -64,6 +67,11 @@ select is((select coalesce(sum(amount),0) from public.payment where ticket_id='7
   0.00, 'case14: payments net to 0 after reversal');
 select is((select coalesce(sum(amount),0) from public.tip where ticket_id='71c00000-0000-0000-0000-0000000000a0'),
   0.00, 'case14: tips net to 0 after reversal (tip reversal branch)');
+-- the void payload reports NET money: no payments/tips remain (not the original positives)
+select is(jsonb_array_length((public._pay_ticket_result('71c00000-0000-0000-0000-0000000000a0'))->'payments'),
+  0, 'case14: void payload shows no net payments');
+select is(((public._pay_ticket_result('71c00000-0000-0000-0000-0000000000a0'))->>'tip_total')::numeric,
+  0.00, 'case14: void payload tip_total is 0');
 
 -- CASE 15a: idempotent replay of the void (same client_tx) -> no-op, still 2 reversals
 select lives_ok($$ select public.void_ticket('71c00000-0000-0000-0000-0000000000a0','customer refund',
@@ -86,6 +94,16 @@ select set_config('request.jwt.claims',
   '{"sub":"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb","user_role":"owner"}', true);
 select throws_ok($$ select public.void_ticket('71c00000-0000-0000-0000-0000000000a3','open',
   'd1000000-0000-0000-0000-0000000000ab') $$, 'P0001', null, 'guard: cannot void an open ticket');
+
+-- CROSS-TICKET VOID-ID REUSE: pay a4, then try to void it reusing a0's void_tx -> P0001
+select set_config('request.jwt.claims',
+  '{"sub":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","user_role":"staff"}', true);
+select lives_ok($$ select public.pay_ticket('71c00000-0000-0000-0000-0000000000a4',
+  '[{"method":"cash","amount":100.00}]','[]','d1000000-0000-0000-0000-0000000000a5') $$, 'setup: second ticket pays');
+select set_config('request.jwt.claims',
+  '{"sub":"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb","user_role":"owner"}', true);
+select throws_ok($$ select public.void_ticket('71c00000-0000-0000-0000-0000000000a4','reuse',
+  'd1000000-0000-0000-0000-0000000000a2') $$, 'P0001', null, 'void: reusing another ticket''s void id raises P0001');
 
 select * from finish();
 rollback;
