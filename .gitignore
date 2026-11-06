@@ -22,3 +22,6 @@ web/out/
 
 # Misc
 *.local
+
+# local pgTAP/runtime sandbox harness (not committed)
+.sandbox/
