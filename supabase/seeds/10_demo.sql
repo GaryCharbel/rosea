@@ -4,8 +4,9 @@
 -- superuser so RLS/owner-write policies don't block it. Auth users live in 00_auth.sql.
 
 -- ── salon identity (the singleton seeded in M02) ──────────────────────────────
+-- Keep name = 'Rosea' (the M02 default a migration test pins); the full salon name
+-- lives in receipt_header, which is what the printed receipt shows.
 update public.salon_settings set
-  name           = 'Rosea Beauty Salon',
   currency       = 'USD',
   address        = '123 Rosea Lane',
   receipt_header = 'Rosea Beauty Salon',

@@ -2,9 +2,11 @@
 begin;
 select plan(9);
 
+-- test-only names so they can't collide with the demo seed's categories (committed
+-- by `supabase db reset` before this suite runs)
 insert into public.category (id, kind, name) values
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'service', 'Hair'),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'product', 'Retail');
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'service', 'Zpgtap Svc'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'product', 'Zpgtap Prod');
 
 select has_table('public', 'service', 'service table exists');
 select ok((select relrowsecurity from pg_class where oid = 'public.service'::regclass), 'RLS is enabled on service');
