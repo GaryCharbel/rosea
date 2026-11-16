@@ -96,7 +96,7 @@
       <div class="brand"><span class="r">✿</span> Rosea <span style="color:var(--mut);font-weight:600;font-size:18px">· Build Checklist</span></div>
       <div class="sub">Foundation → Stage 1 (POS core) → website → dashboard → loyalty. A living A→Z tracker.</div>
     </div>
-    <div class="stamp"><b>Last updated</b><br>2026-11-07 · Stage 1 FEATURE-COMPLETE (Phases 1–4). Phase 5: demo seed (5.1) done; integration test (5.2) + owner demo (5.3) next</div>
+    <div class="stamp"><b>Last updated</b><br>2026-11-07 · Stage 1 BUILD COMPLETE — Phases 1–4 + 5.1 seed + 5.2 integration test all merged. Only the manual owner demo (5.3) remains; its runbook is written</div>
   </header>
 
   <div class="hero">
@@ -186,9 +186,9 @@
     <div class="phd"><div class="pt">Phase 5 — Seed + e2e verification + sign-off<small>ringable + loginable demo salon</small></div>
       <div class="pbar"><i></i></div><div class="mini">0/0</div><div class="caret">▼</div></div>
     <ul class="tasks">
-      <li class="task" data-status="done"><span class="s"></span><div class="tx"><span class="id">5.1</span> <span class="ti">Seeds — auth users + demo salon (idempotent, local-only auth)</span><span class="no">built (in review): 10_demo.sql — idempotent salon + 4 categories, 8 services, 5 products (mixed commission-eligible/stock), 3 staff with varied rates, a client; sandbox-verified clean + correct counts; paste-and-go for hosted testing. 00_auth.sql — local-dev owner+staff (rosea1234) via session_replication_role bypass, local stack only</span></div></li>
-      <li class="task" data-status="todo"><span class="s"></span><div class="tx"><span class="id">5.2</span> <span class="ti">Flutter integration test (the pair-test gate)</span></div></li>
-      <li class="task" data-status="todo"><span class="s"></span><div class="tx"><span class="id">5.3</span> <span class="ti">Manual runtime sign-off (the owner demo)</span></div></li>
+      <li class="task" data-status="done"><span class="s"></span><div class="tx"><span class="id">5.1</span> <span class="ti">Seeds — auth users + demo salon (idempotent, local-only auth)</span><span class="no">merged (#15): 10_demo.sql — idempotent salon + 4 categories, 8 services, 5 products (mixed commission-eligible/stock), 3 staff with varied rates, a client; sandbox-verified + CI green; paste-and-go for hosted testing. 00_auth.sql — local-dev owner+staff (rosea1234). Fixed a seed↔pgTAP collision (seed-independent test fixtures)</span></div></li>
+      <li class="task" data-status="done"><span class="s"></span><div class="tx"><span class="id">5.2</span> <span class="ti">Flutter integration test (the pair-test gate)</span><span class="no">merged (#11): full-flow widget test drives the real checkout UI end to end — catalog tap → ticket → payment sheet → exact-cash → Take payment → receipt #1001 → ticket cleared — PayGateway faked, asserts the intent. Backend half proven by pgTAP. 87 tests</span></div></li>
+      <li class="task" data-status="wip"><span class="s"></span><div class="tx"><span class="id">5.3</span> <span class="ti">Manual runtime sign-off (the owner demo)</span><span class="tag">ready</span><span class="no">step-by-step runbook written (docs/runbook.md): seed + owner login + the multi-performer, discounted, split-paid demo ticket with expected commission/stock/total numbers and the verification SQL (+ void re-check). Awaiting the live run on a connected backend</span></div></li>
       <li class="task" data-status="todo"><span class="s"></span><div class="tx"><span class="id">5.4</span> <span class="ti">Pre-commit gate (mechanize the standing rules)</span></div></li>
       <li class="task" data-status="todo"><span class="s"></span><div class="tx"><span class="id">5.5</span> <span class="ti">Production deploy runbook (first-owner bootstrap)</span></div></li>
     </ul>
