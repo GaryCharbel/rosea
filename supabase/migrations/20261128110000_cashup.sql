@@ -20,6 +20,7 @@ set search_path = ''
 as $$
   select jsonb_build_object(
     'range', jsonb_build_object('from', p_from, 'to', p_to),
+    'currency', coalesce((select s.currency from public.salon_settings s limit 1), ''),
     'takings_by_method', coalesce((
       select jsonb_object_agg(method, cents)
       from (
