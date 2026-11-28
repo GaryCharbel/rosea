@@ -29,12 +29,13 @@ values ('55550000-0000-0000-0000-000000000001', '71c00000-0000-0000-0000-0000000
         'aaaa0000-0000-0000-0000-0000000000a1', 'service', 100.00, 40.00, 40.00, false,
         '2026-01-01 10:00:00+00');
 
-insert into public.payment (ticket_id, method, amount, created_at)
-values ('71c00000-0000-0000-0000-0000000000c1', 'cash', 100.00, '2026-01-01 10:00:00+00');
+insert into public.payment (ticket_id, method, amount, taken_by, client_tx, created_at)
+values ('71c00000-0000-0000-0000-0000000000c1', 'cash', 100.00,
+        '55550000-0000-0000-0000-000000000001', gen_random_uuid(), '2026-01-01 10:00:00+00');
 
-insert into public.tip (ticket_id, staff_id, amount, method, created_at)
+insert into public.tip (ticket_id, staff_id, amount, method, client_tx, created_at)
 values ('71c00000-0000-0000-0000-0000000000c1', '55550000-0000-0000-0000-000000000001',
-        5.00, 'cash', '2026-01-01 10:00:00+00');
+        5.00, 'cash', gen_random_uuid(), '2026-01-01 10:00:00+00');
 
 reset session_replication_role;
 
