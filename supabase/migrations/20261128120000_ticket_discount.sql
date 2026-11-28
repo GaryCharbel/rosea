@@ -93,6 +93,15 @@ begin
       using errcode = 'P0001';
   end if;
 
+  -- 5b. The checkout id must belong to THIS sale. If it already paid a different ticket
+  --     (paid_tx is UNIQUE), the client reused it in error — surface an actionable
+  --     message instead of a raw unique-violation at the final write.
+  if exists (select 1 from public.ticket
+               where paid_tx = p_client_tx and id <> p_ticket_id) then
+    raise exception 'This checkout id was already used on another sale. Start a fresh ticket and retry.'
+      using errcode = 'P0001';
+  end if;
+
   -- 6. Recompute totals from the lines (source of truth — never the client).
   select coalesce(sum(round(l.unit_price * l.qty, 2)), 0),
          coalesce(sum(l.line_discount), 0),
